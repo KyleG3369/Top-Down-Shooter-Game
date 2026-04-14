@@ -1,7 +1,7 @@
 # Top Down Shooter
 
 ## Repository
-<Link to your project's public GitHub respository>
+https://github.com/KyleG3369/Top-Down-Shooter-Game
 
 ## Description
 I am going to create a top down shooter game with spawning enemies. This is relevant to media and digital arts because there will be a custom made map, sound fx, and animations.
