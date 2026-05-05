@@ -8,12 +8,13 @@ class Player(pygame.sprite.Sprite):
 
         # movement
         self.direction = pygame.Vector2()
-        self.speed = 500
+        self.speed = 300
 
     def input(self):
         keys = pygame.key.get_pressed()
         self.direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
         self.direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
+        self.direction = self.direction.normalize() if self.direction else self.direction
 
     def move(self, dt):
         self.rect.center += self.direction * self.speed * dt
