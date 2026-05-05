@@ -7,11 +7,13 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_frect(center = pos)
 
         # movement
-        self.direction = pygame.Vector2(1,0)
+        self.direction = pygame.Vector2()
         self.speed = 500
 
     def input(self):
-        pass
+        keys = pygame.key.get_pressed()
+        self.direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
+        self.direction.y = int(keys[pygame.K_s]) - int(keys[pygame.K_w])
 
     def move(self, dt):
         self.rect.center += self.direction * self.speed * dt
