@@ -39,6 +39,7 @@ class Game:
         for obj in map.get_layer_by_name('Entities'):
             if obj.name == 'Player':
                 self.Player = Player((obj.x, obj.y), self.all_sprites, self.collision_sprites)
+                self.gun = Gun(self.Player, self.all_sprites)
 
     def run(self):
         while self.running:
