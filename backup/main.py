@@ -31,15 +31,9 @@ class Game:
         pygame.time.set_timer(self.enemy_event, 1000)
         self.spawn_positions = []
 
-        # audio
-        self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.wav'))
-        self.shoot_sound.set_volume(0.4)
-        self.music.set_volume(0.3)
-        self.music.play(loops = -1)
-
         # wave system
         self.current_wave = 0
-        self.max_waves = 10
+        self.max_waves = 3
         self.base_enemy_count = 3
 
         self.wave_active = False
@@ -50,6 +44,14 @@ class Game:
         self.wave_start_time = pygame.time.get_ticks()
 
         self.game_won = False
+
+        # audio
+        self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.wav'))
+        self.shoot_sound.set_volume(0.4)
+        self.impact_sound = pygame.mixer.Sound(join('audio', 'impact.ogg'))
+        self.music = pygame.mixer.Sound(join('audio', 'music.wav'))
+        self.music.set_volume(0.3)
+        self.music.play(loops = -1)
 
         # titles
         self.font = pygame.font.Font(None, 72)
@@ -158,16 +160,39 @@ class Game:
             self.bullet_collision()
             self.player_collision()
 
+            # check if wave finished
             if (self.wave_active and self.enemies_spawned == self.enemies_to_spawn and len(self.enemy_sprites) == 0):
                 self.wave_active = False
                 self.wave_start_time = pygame.time.get_ticks()
+            
+            # start next wave after cooldown
+            if not self.wave_active and not self.game_won:
+                current_time = pygame.time.get_ticks()
+                if current_time - self.wave_start_time >= self.wave_cooldown:
+                    self.start_next_wave()
 
             # draw
             self.display_surface.fill('black')
             self.all_sprites.draw(self.Player.rect.center)
+            wave_text = self.small_font.render(f"Wave {self.current_wave}", True, "white")
+            self.display_surface.blit(wave_text, (20, 20))
             pygame.display.update()
 
-        pygame.quit()
+        if self.game_won:
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
+                self.display_surface.fill("black")
+
+                text = self.font.render("YOU WIN", True, "white")
+                rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+
+                self.display_surface.blit(text, rect)
+
+                pygame.display.update()
+        pygame.quit()                     
 
 if __name__ == "__main__":
     game = Game()
