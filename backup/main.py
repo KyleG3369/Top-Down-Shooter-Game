@@ -44,6 +44,7 @@ class Game:
         self.wave_start_time = pygame.time.get_ticks()
 
         self.game_won = False
+        self.game_lost = False
 
         # audio
         self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.wav'))
@@ -121,6 +122,7 @@ class Game:
 
     def player_collision(self):
         if pygame.sprite.spritecollide(self.Player, self.enemy_sprites, False, pygame.sprite.collide_mask):
+            self.game_lost = True
             self.running = False
 
     def start_next_wave(self):
@@ -178,15 +180,19 @@ class Game:
             self.display_surface.blit(wave_text, (20, 20))
             pygame.display.update()
 
-        if self.game_won:
-            while True:
+        while self.game_won or self.game_lost:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         return
+                    
                 self.display_surface.fill("black")
 
-                text = self.font.render("YOU WIN", True, "white")
+                if self.game_won:
+                    text = self.font.render("YOU WIN", True, "white")
+                if self.game_lost:
+                    text = self.font.render("YOU LOSE", True, "red")
+                    
                 rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
 
                 self.display_surface.blit(text, rect)
