@@ -34,14 +34,31 @@ class Game:
         # audio
         self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.wav'))
         self.shoot_sound.set_volume(0.4)
-        self.impact_sound = pygame.mixer.Sound(join('audio', 'impact.ogg'))
-        self.music = pygame.mixer.Sound(join('audio', 'music.wav'))
         self.music.set_volume(0.3)
         self.music.play(loops = -1)
+
+        # wave system
+        self.current_wave = 0
+        self.max_waves = 10
+        self.base_enemy_count = 3
+
+        self.wave_active = False
+        self.enemies_to_spawn = 0
+        self.enemies_spawned = 0
+
+        self.wave_cooldown = 2000
+        self.wave_start_time = pygame.time.get_ticks()
+
+        self.game_won = False
+
+        # titles
+        self.font = pygame.font.Font(None, 72)
+        self.small_font = pygame.font.Font(None, 40)
 
         # setup
         self.load_images()
         self.setup()
+        self.start_next_wave()
 
     def load_images(self):
         self.bullet_surf = pygame.image.load(join('images', 'gun', 'bullet.png')).convert_alpha()
@@ -104,6 +121,21 @@ class Game:
         if pygame.sprite.spritecollide(self.Player, self.enemy_sprites, False, pygame.sprite.collide_mask):
             self.running = False
 
+    def start_next_wave(self):
+
+        self.current_wave += 1
+
+        if self.current_wave > self.max_waves:
+            self.game_won = True
+            self.running = False
+            return
+        
+        self.enemies_to_spawn = self.base_enemy_count + (self.current_wave - 1) * 3
+        self.enemies_spawned = 0
+
+        self.wave_active = True
+        self.wave_start_time = pygame.time.get_ticks()
+
 
     def run(self):
         while self.running:
@@ -115,7 +147,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 if event.type == self.enemy_event:
-                    Enemy(choice(self.spawn_positions), choice(list(self.enemy_frames.values())), (self.all_sprites, self.enemy_sprites), self.Player, self.collision_sprites)
+                    if self.enemies_spawned < self.enemies_to_spawn:
+                        Enemy(choice(self.spawn_positions), choice(list(self.enemy_frames.values())), (self.all_sprites, self.enemy_sprites), self.Player, self.collision_sprites)
+                        self.enemies_spawned += 1
 
             # update
             self.gun_timer()
@@ -123,6 +157,10 @@ class Game:
             self.all_sprites.update(dt)
             self.bullet_collision()
             self.player_collision()
+
+            if (self.wave_active and self.enemies_spawned == self.enemies_to_spawn and len(self.enemy_sprites) == 0):
+                self.wave_active = False
+                self.wave_start_time = pygame.time.get_ticks()
 
             # draw
             self.display_surface.fill('black')
